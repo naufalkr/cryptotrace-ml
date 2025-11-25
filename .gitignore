@@ -100,3 +100,13 @@ target/
 # Exclude ALL processed data outputs but keep folder structure
 /data/processed/*
 !/data/processed/.gitkeep
+
+# Exclude report outputs but keep folder structure
+/reports/risk_scoring/*
+!/reports/risk_scoring/.gitkeep
+!/reports/risk_scoring/figures/
+/reports/risk_scoring/figures/*
+!/reports/risk_scoring/figures/.gitkeep
+
+/reports/graph_investigation/*
+!/reports/graph_investigation/.gitkeep

@@ -8,32 +8,26 @@ from .. import config
 
 
 def load_models():
-    print("[ML] Loading models...")
-    
     if not config.SCALER_PATH.exists():
-        print("   - Models not found. Please train models first.")
+        print("[INFO] Models not found. Please train models first.")
         return None, None, None
     
     scaler = joblib.load(config.SCALER_PATH)
     iso = joblib.load(config.ISOLATION_FOREST_MODEL_PATH)
     lof = joblib.load(config.LOF_MODEL_PATH)
     
-    print("   - Models loaded successfully")
+    print("[INFO] Models loaded from disk")
     return scaler, iso, lof
 
 
 def predict_risk_scores(active_wallets: pd.DataFrame, scaler=None, iso=None, lof=None) -> pd.DataFrame:
-    print("\n[ML] Predicting risk scores...")
-    
     if scaler is None or iso is None or lof is None:
-        print("   - Models not provided. Skipping ML predictions.")
         active_wallets['risk_score_ml'] = 0
         return active_wallets
     
     ml_subset = active_wallets[active_wallets['snd_tx_count'] >= config.MIN_TX_FOR_ML].copy()
     
     if len(ml_subset) == 0:
-        print("   - No wallets qualify for ML prediction")
         active_wallets['risk_score_ml'] = 0
         return active_wallets
     

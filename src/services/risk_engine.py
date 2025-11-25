@@ -6,7 +6,6 @@ from .. import config
 
 
 def calculate_rule_based_scores(active_wallets: pd.DataFrame) -> pd.DataFrame:
-    print("\n[RULES] Calculating rule-based scores...")
     
     def calculate_rules(row):
         score = 0
@@ -35,7 +34,6 @@ def calculate_rule_based_scores(active_wallets: pd.DataFrame) -> pd.DataFrame:
 
 
 def calculate_final_scores(active_wallets: pd.DataFrame) -> pd.DataFrame:
-    print("\n[SCORING] Computing final scores...")
     
     active_wallets['FINAL_RISK_SCORE'] = (
         config.ML_WEIGHT * active_wallets['risk_score_ml'] + 
@@ -58,11 +56,12 @@ def calculate_final_scores(active_wallets: pd.DataFrame) -> pd.DataFrame:
 
 
 def validate_detection(active_wallets: pd.DataFrame) -> Dict:
-    print("\n" + "="*70)
-    print("VALIDATION: TARGET DETECTION CHECK")
-    print("="*70)
+    if not config.VALIDATION_TARGETS:
+        return {'validation_skipped': True}
     
-    targets = [config.ACTOR_SMURF, config.ACTOR_LAYER, config.ACTOR_SPAM]
+    print("\n[INFO] Validation results:")
+    
+    targets = config.VALIDATION_TARGETS
     validation_results = {}
     
     for target in targets:
@@ -70,11 +69,7 @@ def validate_detection(active_wallets: pd.DataFrame) -> Dict:
             row = active_wallets.loc[target]
             detected = row['FINAL_RISK_SCORE'] > config.DETECTION_THRESHOLD
             
-            print(f"Address: {target}")
-            print(f"Score  : {row['FINAL_RISK_SCORE']:.1f} ({row['Risk_Level']})")
-            print(f"Status : {'✅ DETECTED' if detected else '❌ MISSED'}")
-            print(f"Details: PassThrough={row['passthrough_score']}, Struct={row['structuring_score']:.2f}, Bot={row['bot_score']:.2f}")
-            print("-" * 50)
+            print(f"  {target}: {row['FINAL_RISK_SCORE']:.1f} ({row['Risk_Level']}) - {'DETECTED' if detected else 'MISSED'}")
             
             validation_results[target] = {
                 'score': row['FINAL_RISK_SCORE'],
@@ -82,31 +77,25 @@ def validate_detection(active_wallets: pd.DataFrame) -> Dict:
                 'detected': detected
             }
     
-    print("\n[False Positive Check on Real Data]")
-    real_wallets = active_wallets[~active_wallets.index.isin(targets)]
-    high_risk_real = real_wallets[real_wallets['FINAL_RISK_SCORE'] > config.RISK_THRESHOLD_HIGH]
-    
-    if len(high_risk_real) == 0:
-        print("✅ PERFECT! No real wallets flagged as HIGH risk (Clean Dataset confirmed).")
+    if config.VALIDATION_TARGETS:
+        real_wallets = active_wallets[~active_wallets.index.isin(targets)]
     else:
-        print(f"⚠️ WARNING: {len(high_risk_real)} real wallets flagged as HIGH/CRITICAL.")
-        print(high_risk_real[['FINAL_RISK_SCORE', 'snd_tx_count', 'snd_Amount_sum']].head())
+        real_wallets = active_wallets
     
+    high_risk_real = real_wallets[real_wallets['FINAL_RISK_SCORE'] > config.RISK_THRESHOLD_HIGH]
     validation_results['false_positives'] = len(high_risk_real)
     
     return validation_results
 
 
 def export_results(active_wallets: pd.DataFrame):
-    print("\n[EXPORT] Saving results...")
-    
     active_wallets.to_csv(config.RISK_SCORED_CSV_PATH)
-    print(f"   - CSV saved to: {config.RISK_SCORED_CSV_PATH}")
     
     risk_scores = active_wallets[['FINAL_RISK_SCORE', 'Risk_Level']].to_dict(orient='index')
     with open(config.RISK_SCORED_JSON_PATH, 'w') as f:
         json.dump(risk_scores, f, indent=2)
-    print(f"   - JSON saved to: {config.RISK_SCORED_JSON_PATH}")
+    
+    print(f"[INFO] Results saved to {config.REPORTS_DIR}/risk_scoring/")
 
 
 def get_top_risky_wallets(active_wallets: pd.DataFrame, n: int = None) -> pd.DataFrame:

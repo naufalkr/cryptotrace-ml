@@ -68,13 +68,10 @@ def aggregate_wallet_profiles(df_tx: pd.DataFrame, df_wallet: pd.DataFrame) -> p
     final_df = df_wallet.join(df_from, how='outer').join(df_to, how='outer').fillna(0)
     active_wallets = final_df[(final_df['snd_tx_count'] > 0) | (final_df['rcv_tx_count'] > 0)].copy()
     
-    print(f"   - Active wallets: {len(active_wallets)}")
-    
     return active_wallets
 
 
 def calculate_risk_indicators(active_wallets: pd.DataFrame) -> pd.DataFrame:
-    print("\n[FEATURES] Calculating risk indicators...")
     
     active_wallets['structuring_score'] = 0.0
     mask_struct = active_wallets['snd_tx_count'] >= config.STRUCTURING_MIN_TX

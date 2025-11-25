@@ -10,16 +10,18 @@ from .. import config
 
 
 def train_models(active_wallets: pd.DataFrame) -> Tuple[pd.DataFrame, RobustScaler, IsolationForest, LocalOutlierFactor]:
-    print("\n[ML] Training models...")
+    print("[INFO] Training ML models...")
     
-    ml_subset = active_wallets[active_wallets['snd_tx_count'] >= config.MIN_TX_FOR_ML].copy()
+    train_data = active_wallets.copy()
+    if config.VALIDATION_TARGETS:
+        train_data = train_data[~train_data.index.isin(config.VALIDATION_TARGETS)]
+    
+    ml_subset = train_data[train_data['snd_tx_count'] >= config.MIN_TX_FOR_ML].copy()
     
     if len(ml_subset) <= 5:
-        print(f"   - Not enough data for ML ({len(ml_subset)} wallets). Skipping ML training.")
+        print("[WARN] Not enough data for ML training")
         active_wallets['risk_score_ml'] = 0
         return active_wallets, None, None, None
-    
-    print(f"   - Training on {len(ml_subset)} wallets")
     
     scaler = RobustScaler()
     X_scaled = scaler.fit_transform(ml_subset[config.ML_FEATURES])
@@ -42,13 +44,25 @@ def train_models(active_wallets: pd.DataFrame) -> Tuple[pd.DataFrame, RobustScal
         return ((s.max() - s) / (s.max() - s.min() + 1e-10)) * 100
     
     ml_subset['risk_score_ml'] = (normalize_scores(raw_iso) + normalize_scores(raw_lof)) / 2
-    active_wallets = active_wallets.join(ml_subset[['risk_score_ml']], how='left')
+    
+    all_ml_data = active_wallets[active_wallets['snd_tx_count'] >= config.MIN_TX_FOR_ML].copy()
+    X_all_scaled = scaler.transform(all_ml_data[config.ML_FEATURES])
+    
+    raw_iso_all = iso.score_samples(X_all_scaled)
+    lof_all = LocalOutlierFactor(
+        n_neighbors=min(config.LOF_N_NEIGHBORS, len(all_ml_data)-1),
+        contamination=config.LOF_CONTAMINATION
+    )
+    lof_all.fit_predict(X_all_scaled)
+    raw_lof_all = lof_all.negative_outlier_factor_
+    
+    all_ml_data['risk_score_ml'] = (normalize_scores(raw_iso_all) + normalize_scores(raw_lof_all)) / 2
+    
+    active_wallets = active_wallets.join(all_ml_data[['risk_score_ml']], how='left')
     active_wallets['risk_score_ml'] = active_wallets['risk_score_ml'].fillna(0)
     
     joblib.dump(scaler, config.SCALER_PATH)
     joblib.dump(iso, config.ISOLATION_FOREST_MODEL_PATH)
     joblib.dump(lof, config.LOF_MODEL_PATH)
-    
-    print(f"   - Models saved to {config.MODELS_DIR}")
     
     return active_wallets, scaler, iso, lof

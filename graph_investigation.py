@@ -26,7 +26,7 @@ def main(filter_high_risk: bool = True, high_degree_threshold: int = 5):
         print(f"Loading risk-scored wallets from {risk_scored_path}")
         df_wallets_scored = pd.read_csv(risk_scored_path, index_col=0)
     else:
-        print("⚠️ Risk scoring not found. Run main.py first!")
+        print("Warning: Risk scoring not found. Run main.py first!")
         print("Proceeding with raw wallet data (no risk filtering)...")
         df_wallets_scored = df_wallet.set_index('Address')
         filter_high_risk = False
@@ -38,9 +38,9 @@ def main(filter_high_risk: bool = True, high_degree_threshold: int = 5):
         high_degree_threshold=high_degree_threshold
     )
     
-    output_path = config.PROCESSED_DATA_DIR / 'wallet_with_graph_flags.csv'
-    df_wallets_with_flags.to_csv(output_path)
-    print(f"\n✓ Updated wallet data saved to: {output_path}")
+    config.GRAPH_INVESTIGATION_DIR.mkdir(parents=True, exist_ok=True)
+    df_wallets_with_flags.to_csv(config.GRAPH_OUTPUT_CSV_PATH)
+    print(f"\nUpdated wallet data saved to: {config.GRAPH_OUTPUT_CSV_PATH}")
     
     print("\n" + "="*70)
     print("FLAGGED WALLETS SUMMARY")
@@ -72,8 +72,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--degree-threshold",
         type=int,
-        default=5,
-        help="Minimum degree for hub detection (default: 5)"
+        default=None,
+        help=f"Minimum degree for hub detection (default: {config.GRAPH_HUB_DEGREE_THRESHOLD})"
     )
     
     args = parser.parse_args()

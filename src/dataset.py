@@ -61,21 +61,17 @@ def load_wallet_data(file_path: Optional[Path] = None) -> pd.DataFrame:
 
 def inject_synthetic_bad_actors(df_tx: pd.DataFrame) -> pd.DataFrame:
     if not config.INJECT_SYNTHETIC_DATA:
-        print("[DATA] Synthetic injection disabled")
         return df_tx
     
-    print("\n[DATA] Injecting synthetic bad actors...")
+    print("[INFO] Injecting synthetic validation data...")
     
     if not df_tx.empty:
         start_time = df_tx['BlockTime'].min()
     else:
         start_time = pd.Timestamp.now(tz='UTC')
     
-    print(f"   - Base time: {start_time}")
-    
     fake_txs = []
     
-    print(f"   - Smurfing: {config.SMURFING_TX_COUNT} transactions")
     for i in range(config.SMURFING_TX_COUNT):
         fake_txs.append({
             "PKID": 900000 + i,
@@ -88,7 +84,6 @@ def inject_synthetic_bad_actors(df_tx: pd.DataFrame) -> pd.DataFrame:
             "Network": "ethereum-mainnet"
         })
     
-    print(f"   - Layering: In {config.LAYERING_AMOUNT_IN} ETH, Out {config.LAYERING_AMOUNT_OUT} ETH")
     fake_txs.append({
         "PKID": 910000,
         "BlockTime": start_time + pd.Timedelta(minutes=5),
@@ -110,7 +105,6 @@ def inject_synthetic_bad_actors(df_tx: pd.DataFrame) -> pd.DataFrame:
         "Network": "ethereum-mainnet"
     })
     
-    print(f"   - Spam Bot: {config.SPAM_TX_COUNT} transactions")
     for i in range(config.SPAM_TX_COUNT):
         fake_txs.append({
             "PKID": 920000 + i,
@@ -134,10 +128,6 @@ def inject_synthetic_bad_actors(df_tx: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
-    print("="*70)
-    print("CRYPTOTRACE DATA LOADING")
-    print("="*70)
-    
     df_tx = load_transaction_data()
     df_wallet = load_wallet_data()
     
