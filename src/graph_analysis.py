@@ -129,7 +129,7 @@ def prepare_visualization_attributes(
         
         is_validation = validation_targets and node in validation_targets
         if degree_dict.get(node, 0) > config.GRAPH_LABEL_DEGREE_THRESHOLD and not is_validation:
-            labels[node] = node[:config.GRAPH_LABEL_PREFIX_LENGTH]
+            labels[node] = node[:6]
     
     return node_colors, node_sizes, labels
 
@@ -141,19 +141,19 @@ def visualize_investigation_graph(
     labels: Dict[str, str],
     output_path: Path
 ) -> None:
-    pos = nx.spring_layout(H, k=config.GRAPH_LAYOUT_K, seed=config.GRAPH_LAYOUT_SEED)
+    pos = nx.spring_layout(H, k=0.5, seed=42)
     
-    plt.figure(figsize=config.GRAPH_FIGURE_SIZE)
+    plt.figure(figsize=(14, 10))
     
-    nx.draw_networkx_nodes(H, pos, node_color=node_colors, node_size=node_sizes, alpha=config.GRAPH_NODE_ALPHA)
-    nx.draw_networkx_edges(H, pos, alpha=config.GRAPH_EDGE_ALPHA, arrows=True, edge_color=config.GRAPH_COLOR_EDGE)
-    nx.draw_networkx_labels(H, pos, labels=labels, font_size=config.GRAPH_FONT_SIZE, font_weight='bold')
+    nx.draw_networkx_nodes(H, pos, node_color=node_colors, node_size=node_sizes, alpha=0.8)
+    nx.draw_networkx_edges(H, pos, alpha=0.4, arrows=True, edge_color='gray')
+    nx.draw_networkx_labels(H, pos, labels=labels, font_size=8, font_weight='bold')
     
     plt.title("Investigation Map: Smurfing (Orange), Wash Trading (Purple) & Bad Actors (Red)", fontsize=16)
     plt.axis('off')
     
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(output_path, dpi=config.GRAPH_DPI, bbox_inches='tight')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
 
 
