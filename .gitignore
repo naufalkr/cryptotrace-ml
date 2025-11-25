@@ -94,3 +94,7 @@ target/
 
 # exclude data from source control by default
 # /data/
+
+# Exclude ALL processed data outputs but keep folder structure
+/data/processed/*
+!/data/processed/.gitkeep
