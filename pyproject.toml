@@ -1,11 +1,16 @@
-[project]
-name = "datalumina-project-template"
+name = "elisp-cryptotrace-ml"
 version = "0.1.0"
-description = "Add your description here"
+description = "Machine Learning & Analytics Module for Cryptocurrency Investigation Platform"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "python-dotenv>=1.1.1",
+    "pandas>=2.2.0",
+    "numpy>=1.26.0",
+    "scikit-learn>=1.4.0",
+    "matplotlib>=3.8.0",
+    "seaborn>=0.13.0",
+    "joblib>=1.3.0",
 ]
 
 [dependency-groups]

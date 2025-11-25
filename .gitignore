@@ -90,7 +90,9 @@ target/
 .venv/
 
 # Exclude trained models
-/models/
+/models/*.joblib
+/models/*.pkl
+!/models/.gitkeep
 
 # exclude data from source control by default
 # /data/
