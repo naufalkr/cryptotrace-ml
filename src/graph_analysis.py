@@ -114,18 +114,18 @@ def prepare_visualization_attributes(
     
     for node in H.nodes():
         if validation_targets and node in validation_targets:
-            node_colors.append(config.GRAPH_COLOR_BAD_ACTOR)
-            node_sizes.append(config.GRAPH_NODE_SIZE_BAD_ACTOR)
+            node_colors.append('red')
+            node_sizes.append(300)
             labels[node] = node
         elif partition and partition.get(node) == smurf_community and smurf_community != -1:
-            node_colors.append(config.GRAPH_COLOR_GANG)
-            node_sizes.append(config.GRAPH_NODE_SIZE_GANG)
+            node_colors.append('orange')
+            node_sizes.append(100)
         elif any(node in t for t in wash_trades):
-            node_colors.append(config.GRAPH_COLOR_WASH_TRADER)
-            node_sizes.append(config.GRAPH_NODE_SIZE_WASH_TRADER)
+            node_colors.append('purple')
+            node_sizes.append(200)
         else:
-            node_colors.append(config.GRAPH_COLOR_NORMAL)
-            node_sizes.append(config.GRAPH_NODE_SIZE_NORMAL)
+            node_colors.append('#3498db')
+            node_sizes.append(50)
         
         is_validation = validation_targets and node in validation_targets
         if degree_dict.get(node, 0) > config.GRAPH_LABEL_DEGREE_THRESHOLD and not is_validation:
