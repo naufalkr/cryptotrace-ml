@@ -18,19 +18,19 @@ def load_transaction_data(file_path: Optional[Path] = None) -> pd.DataFrame:
             file_path = config.TRANSACTION_CSV_PATH
         else:
             raise FileNotFoundError("No transaction data found in raw data directory")
-    
+
     print(f"[DATA] Loading transactions from: {file_path}")
-    
+
     if file_path.suffix == '.json':
         with open(file_path, 'r') as f:
             data = json.load(f)
         df = pd.DataFrame(data)
     else:
         df = pd.read_csv(file_path)
-    
+
     # Normalize field names to snake_case (handle both old and new format)
     df.columns = df.columns.str.lower()
-    
+
     # Map to standard columns
     column_mapping = {
         'blocknumber': 'block_number',
@@ -42,19 +42,19 @@ def load_transaction_data(file_path: Optional[Path] = None) -> pd.DataFrame:
         'risklevel': 'risk_level'
     }
     df.rename(columns=column_mapping, inplace=True)
-    
+
     # Ensure required columns exist
     for col in ['from_address', 'to_address', 'block_time']:
         if col not in df.columns:
             raise ValueError(f"Missing required column: {col}")
-    
+
     # Convert datetime
     df['block_time'] = pd.to_datetime(df['block_time'], utc=True)
-    
+
     # Convert numeric columns
     df['amount'] = pd.to_numeric(df['amount'], errors='coerce').fillna(0)
     df['fee'] = pd.to_numeric(df['fee'], errors='coerce').fillna(0)
-    
+
     print(f"   - Loaded {len(df)} transactions")
     return df
 
@@ -67,31 +67,31 @@ def load_wallet_data(file_path: Optional[Path] = None) -> pd.DataFrame:
             file_path = config.WALLET_CSV_PATH
         else:
             raise FileNotFoundError("No wallet data found in raw data directory")
-    
+
     print(f"[DATA] Loading wallets from: {file_path}")
-    
+
     if file_path.suffix == '.json':
         with open(file_path, 'r') as f:
             data = json.load(f)
         df = pd.DataFrame(data)
     else:
         df = pd.read_csv(file_path)
-    
+
     # Normalize field names to snake_case
     df.columns = df.columns.str.lower()
-    
+
     # Ensure address column exists
     if 'address' not in df.columns:
         raise ValueError("Missing required column: address")
-    
+
     # Set address as index
     df.set_index('address', inplace=True)
-    
+
     # Convert numeric columns
     df['total_transactions'] = pd.to_numeric(df['total_transactions'], errors='coerce').fillna(0)
     df['total_volume_in'] = pd.to_numeric(df['total_volume_in'], errors='coerce').fillna(0.0)
     df['total_volume_out'] = pd.to_numeric(df['total_volume_out'], errors='coerce').fillna(0.0)
-    
+
     print(f"   - Loaded {len(df)} wallets")
     return df
 
@@ -99,16 +99,16 @@ def load_wallet_data(file_path: Optional[Path] = None) -> pd.DataFrame:
 def inject_synthetic_bad_actors(df_tx: pd.DataFrame) -> pd.DataFrame:
     if not config.INJECT_SYNTHETIC_DATA:
         return df_tx
-    
+
     print("[INFO] Injecting synthetic validation data...")
-    
+
     if not df_tx.empty:
         start_time = df_tx['block_time'].min()
     else:
         start_time = pd.Timestamp.now(tz='UTC')
-    
+
     fake_txs = []
-    
+
     for i in range(config.SMURFING_TX_COUNT):
         fake_txs.append({
             "pkid": 900000 + i,
@@ -123,7 +123,7 @@ def inject_synthetic_bad_actors(df_tx: pd.DataFrame) -> pd.DataFrame:
             "status": True,
             "raw_data": "{}"
         })
-    
+
     fake_txs.append({
         "pkid": 910000,
         "block_time": start_time + pd.Timedelta(minutes=5),
@@ -150,7 +150,7 @@ def inject_synthetic_bad_actors(df_tx: pd.DataFrame) -> pd.DataFrame:
         "status": True,
         "raw_data": "{}"
     })
-    
+
     for i in range(config.SPAM_TX_COUNT):
         fake_txs.append({
             "pkid": 920000 + i,
@@ -165,21 +165,21 @@ def inject_synthetic_bad_actors(df_tx: pd.DataFrame) -> pd.DataFrame:
             "status": True,
             "raw_data": "{}"
         })
-    
+
     df_fake = pd.DataFrame(fake_txs)
     df_combined = pd.concat([df_tx, df_fake], ignore_index=True)
     df_combined['block_time'] = pd.to_datetime(df_combined['block_time'], utc=True)
-    
+
     print(f"   Injected {len(fake_txs)} synthetic transactions")
     print(f"   - Total transactions: {len(df_combined)}")
-    
+
     return df_combined
 
 
 def load_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
     df_tx = load_transaction_data()
     df_wallet = load_wallet_data()
-    
+
     df_tx = inject_synthetic_bad_actors(df_tx)
-    
+
     return df_tx, df_wallet

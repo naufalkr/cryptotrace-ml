@@ -98,10 +98,10 @@ print('[7] FINAL RISK SCORES (30% ML + 70% RULES)')
 print('='*80)
 active_wallets = calculate_final_scores(active_wallets)
 print(f'\nFinal score distribution:')
-print(active_wallets['FINAL_RISK_SCORE'].describe())
+print(active_wallets['risk_score'].describe())
 
 print(f'\nRisk Level Distribution:')
-risk_dist = active_wallets['Risk_Level'].value_counts()
+risk_dist = active_wallets['risk_level'].value_counts()
 for level in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
     count = risk_dist.get(level, 0)
     pct = (count / len(active_wallets)) * 100
@@ -110,11 +110,11 @@ for level in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']:
 print('\n' + '='*80)
 print('[8] TOP 10 WALLETS')
 print('='*80)
-top10 = active_wallets.nlargest(10, 'FINAL_RISK_SCORE')
+top10 = active_wallets.nlargest(10, 'risk_score')
 print(f"\n{'Rank':<5} {'Address':<16} {'Risk':<6} {'Level':<10} {'TX':<4} {'Amount':<12} {'Struct':<8} {'Passth':<8} {'Bot':<8} {'ML%':<6} {'Rule%':<6}")
 print('-'*110)
 for idx, (addr, row) in enumerate(top10.iterrows(), 1):
-    print(f"{idx:<5} {str(addr)[:16]:<16} {row['FINAL_RISK_SCORE']:<6.1f} {row['Risk_Level']:<10} {int(row['snd_tx_count']):<4} {row['snd_amount_sum']:<12.4f} {row['structuring_score']:<8.2f} {row['passthrough_score']:<8.2f} {row['bot_score']:<8.2f} {row['risk_score_ml']:<6.1f} {row['risk_score_rule']:<6.1f}")
+    print(f"{idx:<5} {str(addr)[:16]:<16} {row['risk_score']:<6.1f} {row['risk_level']:<10} {int(row['snd_tx_count']):<4} {row['snd_amount_sum']:<12.4f} {row['structuring_score']:<8.2f} {row['passthrough_score']:<8.2f} {row['bot_score']:<8.2f} {row['risk_score_ml']:<6.1f} {row['risk_score_rule']:<6.1f}")
 
 print('\n' + '='*80)
 print('[9] VALIDATION TARGETS (SYNTHETIC BAD ACTORS)')
@@ -123,12 +123,12 @@ validation_targets = ['0xBAD_ACTOR_SMURFING', '0xBAD_ACTOR_LAYERING', '0xBAD_ACT
 for target in validation_targets:
     if target in active_wallets.index:
         row = active_wallets.loc[target]
-        detected = 'YES' if row['FINAL_RISK_SCORE'] > 60 else 'NO'
+        detected = 'YES' if row['risk_score'] > 60 else 'NO'
         print(f'\n{target}:')
         print(f'  ML Score: {row["risk_score_ml"]:.1f}')
         print(f'  Rule Score: {row["risk_score_rule"]:.1f}')
-        print(f'  Final Score: {row["FINAL_RISK_SCORE"]:.1f}')
-        print(f'  Risk Level: {row["Risk_Level"]}')
+        print(f'  Final Score: {row["risk_score"]:.1f}')
+        print(f'  Risk Level: {row["risk_level"]}')
         print(f'  Detected (>60)?: {detected}')
         print(f'  TX Count: {int(row["snd_tx_count"])}')
         print(f'  Amount Sum: {row["snd_amount_sum"]:.4f}')
