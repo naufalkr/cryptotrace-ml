@@ -26,7 +26,7 @@ def calculate_rule_based_scores(active_wallets: pd.DataFrame) -> pd.DataFrame:
         if row['snd_amount_sum'] > config.VOLUME_ANOMALY_THRESHOLD:
             score += config.RULE_VOLUME_ANOMALY_SCORE
         
-        return min(score, 100)
+        return min(score, 100) / 100.0
     
     active_wallets['risk_score_rule'] = active_wallets.apply(calculate_rules, axis=1)
     
@@ -36,10 +36,10 @@ def calculate_rule_based_scores(active_wallets: pd.DataFrame) -> pd.DataFrame:
 def calculate_final_scores(active_wallets: pd.DataFrame) -> pd.DataFrame:
     
     active_wallets['FINAL_RISK_SCORE'] = (
-        config.ML_WEIGHT * active_wallets['risk_score_ml'] + 
+        config.ML_WEIGHT * active_wallets['risk_score_ml'] / 100.0 + 
         config.RULE_WEIGHT * active_wallets['risk_score_rule']
     )
-    active_wallets['FINAL_RISK_SCORE'] = active_wallets['FINAL_RISK_SCORE'].clip(upper=100)
+    active_wallets['FINAL_RISK_SCORE'] = active_wallets['FINAL_RISK_SCORE'].clip(upper=1.0)
     
     def get_label(s):
         if s >= config.RISK_THRESHOLD_CRITICAL:
@@ -69,7 +69,7 @@ def validate_detection(active_wallets: pd.DataFrame) -> Dict:
             row = active_wallets.loc[target]
             detected = row['FINAL_RISK_SCORE'] > config.DETECTION_THRESHOLD
             
-            print(f"  {target}: {row['FINAL_RISK_SCORE']:.1f} ({row['Risk_Level']}) - {'DETECTED' if detected else 'MISSED'}")
+            print(f"  {target}: {row['FINAL_RISK_SCORE']:.3f} ({row['Risk_Level']}) - {'DETECTED' if detected else 'MISSED'}")
             
             validation_results[target] = {
                 'score': row['FINAL_RISK_SCORE'],

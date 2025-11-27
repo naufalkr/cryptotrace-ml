@@ -41,6 +41,7 @@ def train_models(active_wallets: pd.DataFrame) -> Tuple[pd.DataFrame, RobustScal
     raw_lof = lof.negative_outlier_factor_
     
     def normalize_scores(s):
+        # Normalize to 0-100 range
         return ((s.max() - s) / (s.max() - s.min() + 1e-10)) * 100
     
     ml_subset['risk_score_ml'] = (normalize_scores(raw_iso) + normalize_scores(raw_lof)) / 2

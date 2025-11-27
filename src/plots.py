@@ -47,7 +47,7 @@ def plot_top_wallets_table(active_wallets: pd.DataFrame, n: int = None, save_pat
         table_data.append([
             idx,
             wallet[:12] + "...",
-            f"{row['FINAL_RISK_SCORE']:.1f}",
+            f"{row['FINAL_RISK_SCORE']:.3f}",
             row['Risk_Level'],
             int(row['snd_tx_count']),
             f"{row['snd_amount_sum']:.2f}",

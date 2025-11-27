@@ -36,7 +36,7 @@ SCALER_PATH = MODELS_DIR / "scaler.joblib"
 # VALIDATION CONFIGURATION - Data sintetis untuk testing deteksi
 # ============================================================================
 # Set INJECT_SYNTHETIC_DATA=False untuk production dengan data asli saja
-INJECT_SYNTHETIC_DATA = True
+INJECT_SYNTHETIC_DATA = False
 
 # Set TRAIN_ON_CLEAN_DATA=True agar model tidak dilatih dengan validation targets
 TRAIN_ON_CLEAN_DATA = True
@@ -103,10 +103,10 @@ LOF_CONTAMINATION = 0.05
 # ============================================================================
 # RISK SCORING CONFIGURATION - Threshold dan bobot untuk risk score
 # ============================================================================
-# Risk level thresholds
-RISK_THRESHOLD_CRITICAL = 75
-RISK_THRESHOLD_HIGH = 50
-RISK_THRESHOLD_MEDIUM = 25
+# Risk level thresholds (0.0-1.0 range)
+RISK_THRESHOLD_CRITICAL = 0.75
+RISK_THRESHOLD_HIGH = 0.50
+RISK_THRESHOLD_MEDIUM = 0.25
 
 # Rule-based scoring weights
 RULE_LAYERING_SCORE = 80
@@ -138,7 +138,7 @@ ML_WEIGHT = 0.3
 RULE_WEIGHT = 0.7
 
 # Detection threshold untuk validation
-DETECTION_THRESHOLD = 60
+DETECTION_THRESHOLD = 0.60
 
 
 
