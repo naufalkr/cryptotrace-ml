@@ -54,11 +54,36 @@ python graph_investigation.py --degree-threshold 10
 - `reports/graph_investigation/wallet_with_graph_flags.csv` - Wallets with wash trading and mixer flags
 - `reports/graph_investigation/investigation_graph_final.png` - Network visualization
 
+### Update Database with Risk Scores
+
+After risk scoring analysis, update the database with calculated risk scores:
+
+```bash
+# Preview updates without modifying database
+python update_risk_scores.py --dry-run
+
+# Update database (will prompt for confirmation)
+python update_risk_scores.py
+
+# Update with custom batch size
+python update_risk_scores.py --batch-size 500
+
+# Update from custom input file
+python update_risk_scores.py --input custom_scores.json
+```
+
+**Features:**
+- Bulk updates wallet_addresses table with risk_score and risk_level
+- Batch processing for efficient updates
+- Dry-run mode for previewing changes
+- Confirmation prompt before live updates
+- Progress tracking during update
+
 ### Workflow
 
 ```
-Step 1: Risk Scoring          Step 2: Graph Analysis
-python main.py         -->     python graph_investigation.py
+Step 1: Data Collection              Step 2: Risk Scoring              Step 3: Update Database              Step 4: Graph Analysis
+python collect_data.py       -->     python main.py            -->     python update_risk_scores.py  -->  python graph_investigation.py
 ```
 
 ## Features
