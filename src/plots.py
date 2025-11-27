@@ -23,7 +23,7 @@ def plot_risk_score_distribution(active_wallets: pd.DataFrame, save_path: Path =
 
 def plot_correlation_heatmap(active_wallets: pd.DataFrame, save_path: Path = None):
     features = ['FINAL_RISK_SCORE', 'structuring_score', 'passthrough_score', 
-                'bot_score', 'snd_tx_count', 'snd_Amount_sum']
+                'bot_score', 'snd_tx_count', 'snd_amount_sum']
     
     plt.figure(figsize=(10, 7))
     sns.heatmap(active_wallets[features].corr(), annot=True, cmap="coolwarm", center=0)
@@ -50,7 +50,7 @@ def plot_top_wallets_table(active_wallets: pd.DataFrame, n: int = None, save_pat
             f"{row['FINAL_RISK_SCORE']:.1f}",
             row['Risk_Level'],
             int(row['snd_tx_count']),
-            f"{row['snd_Amount_sum']:.2f}",
+            f"{row['snd_amount_sum']:.2f}",
             f"{row['structuring_score']:.2f}",
             f"{row['passthrough_score']:.2f}",
             f"{row['bot_score']:.2f}"

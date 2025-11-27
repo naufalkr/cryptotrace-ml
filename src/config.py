@@ -14,8 +14,8 @@ GRAPH_INVESTIGATION_DIR = REPORTS_DIR / "graph_investigation"
 for dir_path in [RAW_DATA_DIR, MODELS_DIR, REPORTS_DIR, RISK_SCORING_DIR, GRAPH_INVESTIGATION_DIR]:
     dir_path.mkdir(parents=True, exist_ok=True)
 
-TRANSACTION_JSON_PATH = RAW_DATA_DIR / "transaction.json"
-WALLET_JSON_PATH = RAW_DATA_DIR / "wallet.json"
+TRANSACTION_JSON_PATH = RAW_DATA_DIR / "transactions-db.json"
+WALLET_JSON_PATH = RAW_DATA_DIR / "wallet_addresses-db.json"
 
 RISK_SCORED_CSV_PATH = RISK_SCORING_DIR / "wallet_risk_scored_final.csv"
 RISK_SCORED_JSON_PATH = RISK_SCORING_DIR / "risk_scores_final.json"
@@ -77,7 +77,7 @@ VALIDATION_TARGETS = [
 # ============================================================================
 ML_FEATURES = [
     'snd_tx_count',
-    'snd_Amount_sum',
+    'snd_amount_sum',
     'snd_unique_counterparties',
     'structuring_score',
     'passthrough_score',

@@ -10,9 +10,9 @@ from src import config
 def build_transaction_graph(df_tx: pd.DataFrame) -> nx.DiGraph:
     G = nx.from_pandas_edgelist(
         df_tx,
-        source='FromAddress',
-        target='ToAddress',
-        edge_attr=['Amount', 'PKID'],
+        source='from_address',
+        target='to_address',
+        edge_attr=['amount', 'pkid'],
         create_using=nx.DiGraph()
     )
     return G
@@ -60,8 +60,8 @@ def detect_wash_trading(G: nx.DiGraph, max_cycle_length: int = None) -> Set[Tupl
 
 
 def detect_mixer_usage(df_tx: pd.DataFrame, round_amounts: List[float]) -> pd.Series:
-    mixer_txs = df_tx[df_tx['Amount'].isin(round_amounts)]
-    mixer_users = mixer_txs['FromAddress'].unique()
+    mixer_txs = df_tx[df_tx['amount'].isin(round_amounts)]
+    mixer_users = mixer_txs['from_address'].unique()
     return mixer_users
 
 
@@ -185,8 +185,8 @@ def run_graph_investigation(
             df_wallets['Risk_Level'].isin(['HIGH', 'CRITICAL'])
         ].index
         df_tx_filtered = df_tx[
-            df_tx['FromAddress'].isin(high_risk_wallets) |
-            df_tx['ToAddress'].isin(high_risk_wallets)
+            df_tx['from_address'].isin(high_risk_wallets) |
+            df_tx['to_address'].isin(high_risk_wallets)
         ]
     else:
         df_tx_filtered = df_tx

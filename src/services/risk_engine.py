@@ -23,7 +23,7 @@ def calculate_rule_based_scores(active_wallets: pd.DataFrame) -> pd.DataFrame:
         elif row['bot_score'] > config.BOT_MED_VELOCITY:
             score += config.RULE_SPAM_MED_SCORE
         
-        if row['snd_Amount_sum'] > config.VOLUME_ANOMALY_THRESHOLD:
+        if row['snd_amount_sum'] > config.VOLUME_ANOMALY_THRESHOLD:
             score += config.RULE_VOLUME_ANOMALY_SCORE
         
         return min(score, 100)
