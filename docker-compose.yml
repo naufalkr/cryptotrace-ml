@@ -49,3 +49,4 @@ services:
 networks:
   be-cryptotrace_cryptotrace-network:
     driver: bridge
+    external: true
