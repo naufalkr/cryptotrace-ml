@@ -1,0 +1,22 @@
+version: '3.8'
+
+# Development override for docker-compose.yml
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  cryptotrace-ml:
+    volumes:
+      # Mount source code for hot-reload during development
+      - ./src:/app/src
+      - ./main.py:/app/main.py
+      - ./collect_data.py:/app/collect_data.py
+      - ./update_risk_scores.py:/app/update_risk_scores.py
+      - ./graph_investigation.py:/app/graph_investigation.py
+      - ./run-pipeline.sh:/run-pipeline.sh
+      - ./docker-entrypoint.sh:/docker-entrypoint.sh
+
+    # Override environment for development
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - DEBUG=1

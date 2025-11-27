@@ -4,6 +4,40 @@ Machine Learning & Analytics for Cryptocurrency Investigation
 
 ## Installation
 
+### Option 1: Docker (Recommended) 🐳
+
+**Quick Start:**
+```bash
+# Setup and start
+make setup
+make up
+
+# Or manual
+cp .env.docker .env
+nano .env  # Edit DB_PASSWORD
+docker-compose up -d --build
+```
+
+**Automated Pipeline:**
+- Runs every 30 minutes automatically
+- Collects data → Risk scoring → Updates database
+- Monitor with: `make logs`
+
+**Common Commands:**
+```bash
+make help          # Show all commands
+make up            # Start services
+make down          # Stop services
+make logs          # View logs
+make pipeline      # Run manually
+make shell         # Open container shell
+make backup-db     # Backup database
+```
+
+📖 **Dokumentasi lengkap**: [DOCKER_QUICKSTART.md](DOCKER_QUICKSTART.md) | [DOCKER.md](DOCKER.md)
+
+### Option 2: Local Installation
+
 ```bash
 pip install -e .
 ```

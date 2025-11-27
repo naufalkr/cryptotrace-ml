@@ -58,10 +58,20 @@ target/
 
 # DotEnv configuration
 .env
+.env.local
 
 # Database
 *.db
 *.rdb
+
+# Docker
+docker-compose.override.yml
+*.log
+
+# Backups
+backups/
+*.sql
+*.tar.gz
 
 # Pycharm
 .idea
