@@ -1,26 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database (optional - jika belum ada)
-  postgres:
-    image: postgres:15-alpine
-    container_name: cryptotrace-db
-    environment:
-      POSTGRES_DB: ${DB_NAME:-cryptotrace}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-    ports:
-      - "${DB_PORT:-5432}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - cryptotrace-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # CryptoTrace ML Service
   cryptotrace-ml:
     build:
@@ -56,11 +36,8 @@ services:
       # - ./main.py:/app/main.py
       # - ./collect_data.py:/app/collect_data.py
       # - ./update_risk_scores.py:/app/update_risk_scores.py
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
-      - cryptotrace-network
+      - be-cryptotrace_cryptotrace-network
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -68,31 +45,7 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Optional: PgAdmin for database management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: cryptotrace-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@cryptotrace.local}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-    networks:
-      - cryptotrace-network
-    profiles:
-      - admin
-
-volumes:
-  postgres_data:
-    driver: local
-  pgadmin_data:
-    driver: local
 
 networks:
-  cryptotrace-network:
+  be-cryptotrace_cryptotrace-network:
     driver: bridge
