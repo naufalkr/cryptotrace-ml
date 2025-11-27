@@ -89,19 +89,14 @@ target/
 # Exclude virtual environment
 .venv/
 
-# Exclude trained models
-/models/*.joblib
-/models/*.pkl
-!/models/.gitkeep
 
-# exclude data from source control by default
-# /data/
-
-# Exclude ALL processed data outputs but keep folder structure
 /data/processed/*
 !/data/processed/.gitkeep
+/data/interim/*
+!/data/interim/.gitkeep
+/data/external/*
+!/data/external/.gitkeep
 
-# Exclude report outputs but keep folder structure
 /reports/risk_scoring/*
 !/reports/risk_scoring/.gitkeep
 !/reports/risk_scoring/figures/

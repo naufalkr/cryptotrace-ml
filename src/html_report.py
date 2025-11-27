@@ -23,7 +23,6 @@ def generate_html_report(csv_path: Path, output_path: Path = None):
             elif level == 'MEDIUM':
                 return '#fff9c4'  # Light yellow
         return '#ffffff'  # White
-    
     # Generate HTML with DataTables.js for interactivity
     html_template = """
 <!DOCTYPE html>

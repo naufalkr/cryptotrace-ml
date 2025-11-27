@@ -76,11 +76,6 @@ python main.py         -->     python graph_investigation.py
 - Mixer usage pattern identification
 - Hub wallet identification
 
-### Pattern Detection
-- Smurfing: Multiple small transactions to avoid thresholds
-- Layering: Quick passthrough transactions to obscure origin
-- Bot behavior: High-velocity transaction patterns
-- Round number deposits: Potential mixer usage
 
 ## Configuration
 
@@ -106,10 +101,3 @@ reports/
     figures/            # Visualization charts
   graph_investigation/  # Network analysis outputs
 ```
-
-## Requirements
-
-- Python 3.11+
-- pandas, numpy, scikit-learn
-- networkx, python-louvain
-- matplotlib, seaborn
