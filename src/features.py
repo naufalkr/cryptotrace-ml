@@ -68,6 +68,16 @@ def aggregate_wallet_profiles(df_tx: pd.DataFrame, df_wallet: pd.DataFrame) -> p
     final_df = df_wallet.join(df_from, how='outer').join(df_to, how='outer').fillna(0)
     active_wallets = final_df[(final_df['snd_tx_count'] > 0) | (final_df['rcv_tx_count'] > 0)].copy()
     
+    if 'network' in df_tx.columns:
+        wallet_networks = {}
+        for addr in active_wallets.index:
+            addr_txs = df_tx[(df_tx['from_address'] == addr) | (df_tx['to_address'] == addr)]
+            if len(addr_txs) > 0:
+                wallet_networks[addr] = addr_txs['network'].mode()[0] if len(addr_txs['network'].mode()) > 0 else 'unknown'
+        
+        active_wallets['network'] = active_wallets.index.map(wallet_networks).fillna('unknown')
+        print(f"[FEATURES] Network distribution: {active_wallets['network'].value_counts().to_dict()}")
+    
     return active_wallets
 
 

@@ -95,14 +95,95 @@ def plot_top_wallets_table(active_wallets: pd.DataFrame, n: int = None, save_pat
     plt.close()
 
 
+def plot_network_specific_tables(active_wallets: pd.DataFrame, save_to_file: bool = True):
+    """Generate top wallets table for each network separately."""
+    
+    if 'network' not in active_wallets.columns:
+        print("[INFO] No network column found, skipping network-specific plots")
+        return
+    
+    networks = active_wallets['network'].unique()
+    print(f"[INFO] Generating network-specific visualizations for: {list(networks)}")
+    
+    for network in networks:
+        network_wallets = active_wallets[active_wallets['network'] == network].copy()
+        
+        if len(network_wallets) == 0:
+            continue
+        
+        network_name = network.replace('-mainnet', '').replace('-', '_').upper()
+        
+        top_n = min(10, len(network_wallets))
+        top_wallets = network_wallets.sort_values(by="risk_score", ascending=False).head(top_n)
+        
+        table_data = []
+        for idx, (wallet, row) in enumerate(top_wallets.iterrows(), 1):
+            table_data.append([
+                idx,
+                wallet[:12] + "...",
+                f"{row['risk_score']:.3f}",
+                row['risk_level'],
+                int(row['snd_tx_count']),
+                f"{row['snd_amount_sum']:.2f}",
+                f"{row['structuring_score']:.2f}",
+                f"{row['passthrough_score']:.2f}",
+                f"{row['bot_score']:.2f}"
+            ])
+        
+        fig, ax = plt.subplots(figsize=(16, top_n * 0.4 + 1))
+        ax.axis('tight')
+        ax.axis('off')
+        
+        columns = ['#', 'Wallet Address', 'Risk Score', 'Level', 'Tx Count',
+                   'Total Amount', 'Structuring', 'Passthrough', 'Bot Score']
+        
+        table = ax.table(cellText=table_data, colLabels=columns, cellLoc='center', loc='center')
+        table.auto_set_font_size(False)
+        table.set_fontsize(9)
+        table.scale(1, 2)
+        
+        for i in range(len(columns)):
+            table[(0, i)].set_facecolor('#40466e')
+            table[(0, i)].set_text_props(weight='bold', color='white')
+        
+        for i in range(1, len(table_data) + 1):
+            risk_level = table_data[i-1][3]
+            if risk_level == 'CRITICAL':
+                color = '#ffcccc'
+            elif risk_level == 'HIGH':
+                color = '#ffe6cc'
+            elif risk_level == 'MEDIUM':
+                color = '#ffffcc'
+            else:
+                color = '#e6ffe6'
+            
+            for j in range(len(columns)):
+                table[(i, j)].set_facecolor(color)
+        
+        plt.title(f"Top {top_n} Highest Risk Wallets - {network_name}", fontsize=14, weight='bold', pad=20)
+        
+        if save_to_file:
+            save_path = config.RISK_FIGURES_DIR / f"top_wallets_{network_name.lower()}.png"
+            plt.savefig(save_path, bbox_inches='tight', dpi=150)
+            print(f"[INFO] Saved {network_name} visualization: {save_path}")
+        else:
+            plt.show()
+        
+        plt.close()
+
+
 def generate_all_plots(active_wallets: pd.DataFrame, save_to_file: bool = True):
     if save_to_file:
         config.RISK_FIGURES_DIR.mkdir(parents=True, exist_ok=True)
         plot_risk_score_distribution(active_wallets, config.RISK_FIGURES_DIR / "risk_distribution.png")
         plot_correlation_heatmap(active_wallets, config.RISK_FIGURES_DIR / "correlation_heatmap.png")
         plot_top_wallets_table(active_wallets, save_path=config.RISK_FIGURES_DIR / "top_wallets_table.png")
+        
+        plot_network_specific_tables(active_wallets, save_to_file=True)
+        
         print(f"[INFO] Visualizations saved to {config.RISK_FIGURES_DIR}")
     else:
         plot_risk_score_distribution(active_wallets)
         plot_correlation_heatmap(active_wallets)
         plot_top_wallets_table(active_wallets)
+        plot_network_specific_tables(active_wallets, save_to_file=False)
